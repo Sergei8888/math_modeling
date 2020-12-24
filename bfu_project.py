@@ -4,17 +4,20 @@ from matplotlib.animation import FuncAnimation
 
 figure, axes = plt.subplots()
 
-plt.xlim(-20, 20)
-plt.ylim(-20, 20)
+figLimits = 20 #
+
+plt.xlim(0, figLimits)
+plt.ylim(0, figLimits)
 axes.set_aspect(1)
 
-circleCenter = [0, 10]
-circleRadius = 2
-circleVerticalVelocity = 0
-circleHorizontalVelocity = 0
-circleHorizontalAcceleration = 1
-circleVerticalAcceleration = 1
-g = 10
+
+circleRadius = 1
+circleVelocity = [0.5, 0.1]
+circleAcceleration = [1, 1]
+circleCenter = [figLimits - circleRadius - 1, figLimits/2]
+
+g = 0.01
+M = 0.1
 
 draw_circle = plt.Circle((circleCenter[0], circleCenter[1]), circleRadius)
 
@@ -23,24 +26,32 @@ def init():
     return draw_circle,
 
 def animate(i):
-    global circleCenter, circleRadius, circleVerticalVelocity, circleHorizontalVelocity
-
-    if 20 - circleCenter[0] <= 3 or  20 - circleCenter[0] >=37:
-        circleHorizontalVelocity*= -1
-    if 20 - circleCenter[1] <= 3 or  20 - circleCenter[1] >=37:
-        circleVerticalVelocity*= -1
+    global circleCenter, circleRadius, circleVelocity, circleAcceleration, g, M
     
-    '''circleVerticalVelocity -= 0.04 
-    if 20 - circleCenter[1] <= 3:
-        circleVerticalVelocity = 0'''
+    if circleCenter[0] <= 1 or circleCenter[0] >= 19:
+        circleVelocity[0] *= -1
 
-    circleHorizontalVelocity *= circleHorizontalAcceleration
-    circleVerticalVelocity *= circleVerticalAcceleration
+    if circleCenter[1] <= 1 or circleCenter[1] >= 19:
+        circleVelocity[1] *= -1
 
-    circleCenter[0] = circleCenter[0] + circleHorizontalVelocity
-    circleCenter[1] = circleCenter[1] + circleVerticalVelocity
+    if circleCenter[1] != circleRadius:
+        circleVelocity[1] = circleVelocity[1] - g
+    
+    circleVelocity[0] *= circleAcceleration[0]
+    circleVelocity[1] *= circleAcceleration[1]
+    
+    circleCenter[0] = circleCenter[0] + circleVelocity[0]
+    circleCenter[1] = circleCenter[1] + circleVelocity[1]
+    
+    if circleCenter[0] < circleRadius - 0.1:
+        circleVelocity[0] = 0
+        circleCenter[0] = circleRadius
+    if circleCenter[1] < circleRadius - 0.1:
+        circleVelocity[1] = 0
+        circleCenter[1] = circleRadius
 
     draw_circle.center = (circleCenter[0], circleCenter[1])
+    
     return draw_circle,
 
 anim = FuncAnimation(figure, animate, 
@@ -48,7 +59,5 @@ anim = FuncAnimation(figure, animate,
                                interval=10,
                                blit=True)
 
-
 plt.title('Circle')
 plt.show()
-
